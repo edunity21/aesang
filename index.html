@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>애상 조편성 · 순천승평중 3학년 음악</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{
+  --night:#0B1A2E; --night-2:#12294a; --paper:#EEF3F7; --card:#FFFFFF;
+  --ink:#0D1B2A; --muted:#64748B; --line:#DCE5EC;
+  --male:#2E5FD8; --female:#E23D74; --rap:#F2A007;
+  --teal:#0E8A93; --danger:#C0392B; --ok:#15803D;
+  --r:14px;
+  --display:'Black Han Sans',Pretendard,sans-serif;
+  --body:Pretendard,-apple-system,'Malgun Gothic',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--body); background:var(--paper); color:var(--ink);
+  -webkit-text-size-adjust:100%; line-height:1.5;
+}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 64px}
+
+/*──── 스테이지 헤더 ────*/
+.stage{
+  background:linear-gradient(160deg,var(--night) 0%,var(--night-2) 100%);
+  color:#fff; padding:22px 0 20px; position:relative; overflow:hidden;
+}
+.stage::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:3px;
+  background:linear-gradient(90deg,var(--male) 0 33.3%,var(--female) 33.3% 66.6%,var(--rap) 66.6% 100%);
+}
+.stage .wrap{padding-bottom:0}
+.eyebrow{
+  font-family:var(--mono); font-size:11px; letter-spacing:.16em;
+  color:#8FB4D9; text-transform:uppercase; margin:0 0 4px;
+}
+.title{font-family:var(--display);font-size:40px;line-height:1;margin:0;letter-spacing:.02em}
+.title small{font-size:14px;font-family:var(--body);font-weight:500;color:#A9C6E4;margin-left:10px;letter-spacing:0}
+.who{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.chip{
+  font-size:12px;padding:5px 10px;border-radius:999px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
+}
+.chip.mono{font-family:var(--mono)}
+.chip.open{background:rgba(21,128,61,.9);border-color:transparent}
+.chip.shut{background:rgba(192,57,43,.9);border-color:transparent}
+.linkout{margin-left:auto;font-size:12px;color:#A9C6E4;background:none;border:0;text-decoration:underline;padding:4px}
+
+/*──── 카드 ────*/
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-top:16px}
+.card h2{font-size:15px;margin:0 0 4px;letter-spacing:-.01em}
+.card .sub{font-size:13px;color:var(--muted);margin:0 0 14px}
+.sect{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted);
+  text-transform:uppercase;margin:26px 0 0;display:flex;align-items:center;gap:10px
+}
+.sect::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/*──── 믹서(시그니처) ────*/
+.mixer{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 0}
+.ch{
+  position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  background:#F8FAFC;min-height:158px;display:flex;flex-direction:column;
+  padding:12px 10px;text-align:center;transition:transform .15s ease,box-shadow .15s ease
+}
+.ch .lamp{
+  width:9px;height:9px;border-radius:50%;background:#CBD5E1;margin:0 auto 9px;
+  box-shadow:none;transition:all .25s ease
+}
+.ch .plabel{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted)}
+.ch .pname{font-family:var(--display);font-size:17px;margin:3px 0 0;letter-spacing:.02em}
+.ch .slotname{margin-top:auto;font-size:14px;font-weight:600;word-break:keep-all}
+.ch .slotno{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+.ch .empty{margin-top:auto;font-size:12px;color:#94A3B8}
+.ch .fader{position:absolute;left:0;right:0;bottom:0;height:0;opacity:.13;transition:height .4s cubic-bezier(.2,.7,.3,1)}
+.ch[data-filled="1"] .fader{height:100%}
+.ch[data-p="male"][data-filled="1"]{border-color:var(--male)}
+.ch[data-p="male"] .fader{background:var(--male)}
+.ch[data-p="male"][data-filled="1"] .lamp{background:var(--male);box-shadow:0 0 0 4px rgba(46,95,216,.18)}
+.ch[data-p="female"][data-filled="1"]{border-color:var(--female)}
+.ch[data-p="female"] .fader{background:var(--female)}
+.ch[data-p="female"][data-filled="1"] .lamp{background:var(--female);box-shadow:0 0 0 4px rgba(226,61,116,.18)}
+.ch[data-p="rap"][data-filled="1"]{border-color:var(--rap)}
+.ch[data-p="rap"] .fader{background:var(--rap)}
+.ch[data-p="rap"][data-filled="1"] .lamp{background:var(--rap);box-shadow:0 0 0 4px rgba(242,160,7,.2)}
+.ch.me{box-shadow:inset 0 0 0 2px var(--ink)}
+.ch.me::before{
+  content:"나";position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;
+  background:var(--ink);color:#fff;border-radius:999px;padding:1px 6px
+}
+.ch > *{position:relative;z-index:1}
+
+/*──── 코드 ────*/
+.codebox{
+  display:flex;align-items:center;gap:12px;background:var(--night);color:#fff;
+  border-radius:12px;padding:12px 16px;margin-top:14px;flex-wrap:wrap
+}
+.codebox .k{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:#8FB4D9}
+.codebox .v{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:.22em}
+.codebox button{
+  margin-left:auto;background:rgba(255,255,255,.14);color:#fff;border:0;
+  border-radius:8px;padding:8px 12px;font-size:12px
+}
+
+/*──── 버튼 ────*/
+.btn{
+  border:0;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:600;
+  background:var(--teal);color:#fff;transition:filter .15s
+}
+.btn:hover:not(:disabled){filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.dark{background:var(--ink)}
+.btn.warn{background:#fff;color:var(--danger);border:1px solid #F0C8C2}
+.btn.block{width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.row .btn{flex:1;min-width:130px}
+
+/*──── 폼 ────*/
+label.f{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:14px 0 6px}
+input.f{
+  width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;
+  font-size:16px;background:#fff;color:var(--ink)
+}
+input.f:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:transparent}
+input.f.mono{font-family:var(--mono);letter-spacing:.14em}
+.picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.pick{
+  border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 6px;
+  font-size:13px;font-weight:600;color:var(--ink);text-align:center
+}
+.pick[aria-pressed="true"][data-p="male"]{background:var(--male);color:#fff;border-color:transparent}
+.pick[aria-pressed="true"][data-p="female"]{background:var(--female);color:#fff;border-color:transparent}
+.pick[aria-pressed="true"][data-p="rap"]{background:var(--rap);color:#3d2600;border-color:transparent}
+.pick:disabled{opacity:.35;cursor:not-allowed}
+.pick small{display:block;font-weight:500;font-size:10px;opacity:.75;margin-top:2px}
+
+/*──── 목록 ────*/
+.tlist{display:flex;flex-direction:column;gap:8px}
+.trow{
+  display:flex;align-items:center;gap:10px;border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;background:#fff;font-size:13px
+}
+.trow .id{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:52px}
+.trow .mem{flex:1;display:flex;gap:6px;flex-wrap:wrap}
+.dot{display:inline-flex;align-items:center;gap:4px}
+.dot::before{content:"";width:7px;height:7px;border-radius:50%;background:#CBD5E1}
+.dot.male::before{background:var(--male)} .dot.female::before{background:var(--female)} .dot.rap::before{background:var(--rap)}
+.state{font-size:11px;font-family:var(--mono);padding:3px 7px;border-radius:999px;background:#F1F5F9;color:var(--muted)}
+.state.done{background:#DCFCE7;color:var(--ok)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12px;background:#F1F5F9;border-radius:999px;padding:5px 10px;color:#475569}
+.pill b{font-family:var(--mono);font-weight:600;color:var(--ink);margin-right:4px}
+
+/*──── 알림 ────*/
+.note{border-left:3px solid var(--teal);background:#F0F9FA;padding:11px 14px;border-radius:0 8px 8px 0;font-size:13px;margin-top:14px}
+.note.shut{border-color:var(--danger);background:#FDF2F0;color:#7F1D1D}
+.err{background:#FDF2F0;color:#8C2A1D;border:1px solid #F3CFC8;border-radius:10px;padding:11px 14px;font-size:13px;margin-top:14px}
+.err:empty{display:none}
+.toast{
+  position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);z-index:99;
+  background:var(--ink);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;
+  opacity:0;pointer-events:none;transition:all .25s;max-width:88vw;text-align:center
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.hide{display:none !important}
+.foot{text-align:center;font-family:var(--mono);font-size:10px;color:#94A3B8;margin-top:30px;letter-spacing:.08em}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+@media (max-width:400px){ .title{font-size:32px} .ch{min-height:142px;padding:10px 6px} .ch .pname{font-size:15px} }
+</style>
+</head>
+<body>
+
+<header class="stage">
+  <div class="wrap">
+    <p class="eyebrow">순천승평중학교 · 3학년 음악 가창수행평가</p>
+    <h1 class="title">애상 <small>쿨 · 1998 — 3인 1조 조편성</small></h1>
+    <div class="who" id="who"></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 1단계: 구글 로그인 -->
+  <section id="s1" class="card">
+    <h2>학교 구글 계정으로 시작하기</h2>
+    <p class="sub">@ai.jne.kr 계정만 접속할 수 있습니다.</p>
+    <div id="gbtn"></div>
+    <div class="err" id="e1"></div>
+  </section>
+
+  <!-- 2단계: 본인 확인 -->
+  <section id="s2" class="card hide">
+    <h2>본인 확인</h2>
+    <p class="sub" id="s2sub"></p>
+    <label class="f" for="hak">학번 (4자리)</label>
+    <input class="f mono" id="hak" inputmode="numeric" maxlength="4" placeholder="3101" autocomplete="off">
+    <label class="f" for="nm">이름</label>
+    <input class="f" id="nm" placeholder="홍길동" autocomplete="off">
+    <label class="f" for="pw">학생용 비밀번호</label>
+    <input class="f" id="pw" type="password" placeholder="선생님이 알려 준 비밀번호" autocomplete="off">
+    <div class="row">
+      <button class="btn block" id="doVerify">확인하고 들어가기</button>
+    </div>
+    <div class="err" id="e2"></div>
+  </section>
+
+  <!-- 3단계: 메인 -->
+  <section id="s3" class="hide">
+
+    <div id="notice"></div>
+
+    <!-- 내 조 있음 -->
+    <div class="card hide" id="myteam">
+      <h2 id="mtName">내 조</h2>
+      <p class="sub" id="mtSub"></p>
+      <div class="mixer" id="mixer"></div>
+      <div id="extraSlot"></div>
+      <div class="codebox" id="codebox">
+        <span class="k">참여코드</span>
+        <span class="v" id="mtCode">----</span>
+        <button id="copyCode">복사</button>
+      </div>
+      <div class="row">
+        <button class="btn dark" id="doSubmit">조 확정하기</button>
+        <button class="btn ghost" id="doRename">조 이름 바꾸기</button>
+        <button class="btn warn" id="doLeave">조에서 나가기</button>
+      </div>
+      <div class="err" id="e3"></div>
+    </div>
+
+    <!-- 내 조 없음 -->
+    <div class="card hide" id="noteam">
+      <h2>아직 조가 없습니다</h2>
+      <p class="sub">새로 조를 만들고 친구에게 참여코드를 알려 주거나, 받은 참여코드로 들어가세요.</p>
+
+      <label class="f">내가 맡을 파트</label>
+      <div class="picker" id="pickCreate">
+        <button class="pick" data-p="male" aria-pressed="false">남성파트<small>메인 보컬</small></button>
+        <button class="pick" data-p="female" aria-pressed="false">여성파트<small>메인 보컬</small></button>
+        <button class="pick" data-p="rap" aria-pressed="false">랩파트<small>랩 · 애드리브</small></button>
+      </div>
+      <div class="row">
+        <button class="btn block" id="doCreate">이 파트로 조 만들기</button>
+      </div>
+
+      <div class="sect">또는 참여코드로 들어가기</div>
+      <label class="f" for="jcode">친구에게 받은 참여코드</label>
+      <input class="f mono" id="jcode" maxlength="4" placeholder="예: K7QM" autocomplete="off" style="text-transform:uppercase">
+      <label class="f">내가 맡을 파트</label>
+      <div class="picker" id="pickJoin">
+        <button class="pick" data-p="male" aria-pressed="false">남성파트</button>
+        <button class="pick" data-p="female" aria-pressed="false">여성파트</button>
+        <button class="pick" data-p="rap" aria-pressed="false">랩파트</button>
+      </div>
+      <div class="row">
+        <button class="btn block ghost" id="doJoin">이 조에 참여하기</button>
+      </div>
+      <div class="err" id="e4"></div>
+    </div>
+
+    <div class="sect">우리 반 조 현황</div>
+    <div class="card">
+      <p class="sub" id="clsStat"></p>
+      <div class="tlist" id="teamList"></div>
+    </div>
+
+    <div class="sect">아직 조가 없는 친구</div>
+    <div class="card">
+      <div class="pills" id="unassigned"></div>
+    </div>
+  </section>
+
+  <p class="foot" id="foot">SEUNGPYEONG MUSIC · AESANG TEAM BUILDER</p>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/*═══════════ 설정 ═══════════*/
+const GAS_URL   = '여기에_APPS_SCRIPT_웹앱_URL_붙여넣기';
+const CLIENT_ID = '여기에_클라이언트ID.apps.googleusercontent.com';
+const APP_VER   = 'v1.0.0';
+
+/*═══════════ 상태 ═══════════*/
+let credential = null, token = null, state = null;
+let createPart = null, joinPart = null, timer = null;
+
+const store = (() => {
+  try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return localStorage; }
+  catch(e){ const m={}; return {getItem:k=>m[k]??null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}; }
+})();
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s??'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), 2600);
+}
+function showErr(id, msg){ $(id).textContent = msg || ''; }
+function busy(btn, on, label){
+  if(!btn) return;
+  if(on){ btn._t = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'+(label||'처리 중'); }
+  else { btn.disabled = false; if(btn._t) btn.innerHTML = btn._t; }
+}
+
+/*═══════════ 통신 ═══════════*/
+async function api(action, payload){
+  const res = await fetch(GAS_URL, {
+    method:'POST', redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(Object.assign({action}, payload||{}))
+  });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || '알 수 없는 오류가 발생했습니다.');
+  return data;
+}
+
+/*═══════════ 구글 로그인 ═══════════*/
+window.onload = () => {
+  const boot = () => {
+    if(!window.google || !google.accounts) return setTimeout(boot, 200);
+    google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onCredential, hd:'ai.jne.kr' });
+    google.accounts.id.renderButton($('gbtn'), { theme:'filled_blue', size:'large', width:300, text:'signin_with', locale:'ko' });
+  };
+  boot();
+
+  const saved = store.getItem('aesang_token');
+  if(saved){ token = saved; refresh(true).catch(()=>{ token=null; store.removeItem('aesang_token'); }); }
+};
+
+function onCredential(resp){
+  credential = resp.credential;
+  const payload = JSON.parse(atob(credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+  $('s2sub').textContent = payload.email + ' 계정으로 확인합니다.';
+  $('s1').classList.add('hide');
+  $('s2').classList.remove('hide');
+  $('hak').focus();
+}
+
+/*═══════════ 본인 확인 ═══════════*/
+$('doVerify').onclick = async () => {
+  showErr('e2','');
+  const hakbeon = $('hak').value.trim(), name = $('nm').value.trim(), password = $('pw').value.trim();
+  if(!/^\d{4}$/.test(hakbeon)) return showErr('e2','학번은 4자리 숫자로 입력하세요. (예: 3101)');
+  if(!name) return showErr('e2','이름을 입력하세요.');
+  if(!password) return showErr('e2','학생용 비밀번호를 입력하세요.');
+
+  const btn = $('doVerify'); busy(btn, true, '확인 중');
+  try{
+    const r = await api('studentLogin', {credential, hakbeon, name, password});
+    token = r.token; store.setItem('aesang_token', token);
+    $('s2').classList.add('hide');
+    await refresh(true);
+    toast(r.me.name + '님, 반갑습니다');
+  }catch(err){ showErr('e2', err.message); }
+  finally{ busy(btn,false); }
+};
+['hak','nm','pw'].forEach(id => $(id).addEventListener('keydown', e => { if(e.key==='Enter') $('doVerify').click(); }));
+
+/*═══════════ 상태 갱신 ═══════════*/
+async function refresh(first){
+  const r = await api('studentState', {token});
+  state = r;
+  render();
+  if(first){
+    $('s1').classList.add('hide'); $('s2').classList.add('hide');
+    $('s3').classList.remove('hide');
+    $('foot').textContent = 'SEUNGPYEONG MUSIC · AESANG TEAM BUILDER · ' + APP_VER + ' / ' + (r.version||'');
+    if(timer) clearInterval(timer);
+    timer = setInterval(()=>{ if(!document.hidden) refresh(false).catch(()=>{}); }, 6000);
+  }
+}
+
+function render(){
+  const s = state, me = s.me;
+
+  $('who').innerHTML =
+    '<span class="chip mono">'+esc(me.hakbeon)+'</span>' +
+    '<span class="chip">'+esc(me.name)+'</span>' +
+    '<span class="chip">3학년 '+esc(me.cls)+'반</span>' +
+    '<span class="chip '+(s.open?'open':'shut')+'">'+(s.open?'입력 가능':'입력 잠김')+'</span>' +
+    '<button class="linkout" id="logout">로그아웃</button>';
+  $('logout').onclick = () => {
+    store.removeItem('aesang_token'); if(timer) clearInterval(timer);
+    try{ google.accounts.id.disableAutoSelect(); }catch(e){}
+    location.reload();
+  };
+
+  $('notice').innerHTML = s.open
+    ? (s.notice ? '<div class="note">'+esc(s.notice)+'</div>' : '')
+    : '<div class="note shut">선생님이 입력을 잠가 두었습니다. 지금은 확인만 할 수 있어요.</div>';
+
+  const t = s.myTeam;
+  $('myteam').classList.toggle('hide', !t);
+  $('noteam').classList.toggle('hide', !!t);
+
+  if(t){
+    const done = ['male','female','rap'].every(p => t[p]);
+    $('mtName').textContent = t.teamName || t.teamId;
+    $('mtSub').textContent = t.teamId + ' · ' + (t.status === '확정'
+      ? '확정 완료. 수정하려면 확정을 취소하세요.'
+      : (done ? '세 파트가 모두 찼습니다. [조 확정하기]를 누르세요.' : '빈 파트를 친구가 참여코드로 채우면 됩니다.'));
+
+    $('mixer').innerHTML = ['male','female','rap'].map(p => {
+      const m = t[p], mine = m && m.hakbeon === me.hakbeon;
+      const label = {male:'남성파트',female:'여성파트',rap:'랩파트'}[p];
+      const role  = {male:'MALE VOCAL',female:'FEMALE VOCAL',rap:'RAP'}[p];
+      return '<div class="ch'+(mine?' me':'')+'" data-p="'+p+'" data-filled="'+(m?1:0)+'">' +
+        '<div class="fader"></div><div class="lamp"></div>' +
+        '<div class="plabel">'+role+'</div><div class="pname">'+label+'</div>' +
+        (m ? '<div class="slotname">'+esc(m.name)+'</div><div class="slotno">'+esc(m.hakbeon)+'</div>'
+           : '<div class="empty">비어 있음</div>') +
+        '</div>';
+    }).join('');
+
+    $('extraSlot').innerHTML = t.extra
+      ? '<div class="note">추가원 · ' + esc(t.extra.name) + ' (' + esc(t.extra.hakbeon) + ') — 선생님이 배정했습니다.</div>'
+      : '';
+
+    $('mtCode').textContent = t.code;
+    $('doSubmit').textContent = t.status === '확정' ? '확정 취소' : '조 확정하기';
+    $('doSubmit').disabled = !s.open || (t.status !== '확정' && !done);
+    $('doRename').disabled = !s.open || t.status === '확정';
+    $('doLeave').disabled  = !s.open || t.status === '확정';
+    $('codebox').classList.toggle('hide', t.status === '확정');
+  }
+
+  ['doCreate','doJoin','jcode'].forEach(id => { $(id).disabled = !s.open; });
+  document.querySelectorAll('#pickCreate .pick, #pickJoin .pick').forEach(b => { b.disabled = !s.open; });
+
+  const placed = s.total - s.unassigned.length;
+  $('clsStat').textContent = s.teams.length + '개 조 · ' + placed + '/' + s.total + '명 배정 · 확정 ' +
+    s.teams.filter(x=>x.status==='확정').length + '개 조';
+
+  $('teamList').innerHTML = s.teams.length ? s.teams.map(x => {
+    const mem = ['male','female','rap','extra'].map(p => x[p]
+      ? '<span class="dot '+p+'">'+esc(x[p].name)+'</span>' : '').filter(Boolean).join('');
+    const isMine = t && x.teamId === t.teamId;
+    return '<div class="trow"'+(isMine?' style="border-color:var(--ink)"':'')+'>' +
+      '<span class="id">'+esc(x.teamId)+'</span>' +
+      '<span class="mem">'+(mem || '<span style="color:#94A3B8">구성원 없음</span>')+'</span>' +
+      '<span class="state'+(x.status==='확정'?' done':'')+'">'+esc(x.status)+'</span></div>';
+  }).join('') : '<p class="sub" style="margin:0">아직 만들어진 조가 없습니다.</p>';
+
+  $('unassigned').innerHTML = s.unassigned.length
+    ? s.unassigned.map(u => '<span class="pill"><b>'+esc(u.hakbeon)+'</b>'+esc(u.name)+'</span>').join('')
+    : '<span class="pill">모든 학생이 조에 배정되었습니다</span>';
+}
+
+/*═══════════ 파트 선택 ═══════════*/
+function bindPicker(wrapId, set){
+  $(wrapId).addEventListener('click', e => {
+    const b = e.target.closest('.pick'); if(!b || b.disabled) return;
+    $(wrapId).querySelectorAll('.pick').forEach(x => x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    set(b.dataset.p);
+  });
+}
+bindPicker('pickCreate', p => createPart = p);
+bindPicker('pickJoin',   p => joinPart   = p);
+
+/*═══════════ 동작 ═══════════*/
+async function act(btn, errId, fn, okMsg){
+  showErr(errId,''); busy(btn,true);
+  try{ await fn(); await refresh(false); if(okMsg) toast(okMsg); }
+  catch(err){ showErr(errId, err.message); }
+  finally{ busy(btn,false); }
+}
+
+$('doCreate').onclick = () => {
+  if(!createPart) return showErr('e4','맡을 파트를 먼저 선택하세요.');
+  act($('doCreate'), 'e4', () => api('createTeam', {token, part:createPart}), '조를 만들었습니다. 참여코드를 친구에게 알려 주세요.');
+};
+
+$('doJoin').onclick = () => {
+  const code = $('jcode').value.trim().toUpperCase();
+  if(code.length !== 4) return showErr('e4','참여코드 4자리를 입력하세요.');
+  if(!joinPart) return showErr('e4','맡을 파트를 먼저 선택하세요.');
+  act($('doJoin'), 'e4', () => api('joinTeam', {token, code, part:joinPart}), '조에 참여했습니다.');
+};
+
+$('doSubmit').onclick = () => {
+  const next = state.myTeam.status === '확정' ? '작성중' : '확정';
+  if(next === '확정' && !confirm('이 구성으로 확정할까요? 확정 후에는 수정할 수 없습니다.')) return;
+  act($('doSubmit'), 'e3', () => api('submitTeam', {token, status:next}),
+      next === '확정' ? '조를 확정했습니다.' : '확정을 취소했습니다.');
+};
+
+$('doLeave').onclick = () => {
+  if(!confirm('조에서 나갈까요? 혼자 남은 조는 사라집니다.')) return;
+  act($('doLeave'), 'e3', () => api('leaveTeam', {token}), '조에서 나왔습니다.');
+};
+
+$('doRename').onclick = () => {
+  const v = prompt('조 이름을 입력하세요 (20자 이내)', state.myTeam.teamName || '');
+  if(v === null) return;
+  act($('doRename'), 'e3', () => api('renameTeam', {token, teamName:v}), '조 이름을 바꿨습니다.');
+};
+
+$('copyCode').onclick = async () => {
+  const code = state.myTeam.code;
+  try{ await navigator.clipboard.writeText(code); toast('참여코드 '+code+'를 복사했습니다.'); }
+  catch(e){ toast('참여코드: '+code); }
+};
+
+$('jcode').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
+</script>
+</body>
+</html>

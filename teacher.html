@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>교사용 · 애상 조편성 관리</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{
+  --night:#0B1A2E; --night-2:#12294a; --paper:#EEF3F7; --card:#fff;
+  --ink:#0D1B2A; --muted:#64748B; --line:#DCE5EC;
+  --male:#2E5FD8; --female:#E23D74; --rap:#F2A007;
+  --teal:#0E8A93; --danger:#C0392B; --ok:#15803D;
+  --display:'Black Han Sans',Pretendard,sans-serif;
+  --body:Pretendard,-apple-system,'Malgun Gothic',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--body);background:var(--paper);color:var(--ink);line-height:1.5}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px 70px}
+
+.stage{background:linear-gradient(160deg,var(--night),var(--night-2));color:#fff;padding:20px 0;position:relative}
+.stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
+  background:linear-gradient(90deg,var(--male) 0 33.3%,var(--female) 33.3% 66.6%,var(--rap) 66.6% 100%)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:#8FB4D9;margin:0 0 4px}
+.title{font-family:var(--display);font-size:30px;margin:0;letter-spacing:.02em}
+.title small{font-family:var(--body);font-size:13px;font-weight:500;color:#A9C6E4;margin-left:10px}
+.who{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.chip{font-size:12px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
+.chip.mono{font-family:var(--mono)}
+.linkout{margin-left:auto;font-size:12px;color:#A9C6E4;background:none;border:0;text-decoration:underline}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+.card h2{font-size:15px;margin:0 0 4px}
+.card .sub{font-size:13px;color:var(--muted);margin:0 0 14px}
+.sect{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;
+  margin:26px 0 0;display:flex;align-items:center;gap:10px}
+.sect::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.btn{border:0;border-radius:9px;padding:10px 14px;font-size:13px;font-weight:600;background:var(--teal);color:#fff}
+.btn:hover:not(:disabled){filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.dark{background:var(--ink)}
+.btn.warn{background:#fff;color:var(--danger);border:1px solid #F0C8C2}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:7px}
+.btn.block{width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+label.f{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:14px 0 6px}
+input.f,textarea.f,select.f{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;color:var(--ink)}
+input.f:focus,textarea.f:focus,select.f:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:transparent}
+textarea.f{min-height:110px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.7}
+.hint{font-size:11px;color:var(--muted);margin-top:6px}
+
+/* 반 대시보드 */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:4px}
+.cbox{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff;text-align:left}
+.cbox.sel{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.cbox .cn{font-family:var(--display);font-size:20px;letter-spacing:.02em}
+.cbox .st{font-size:11px;font-family:var(--mono);padding:2px 7px;border-radius:999px;float:right;margin-top:3px}
+.st.open{background:#DCFCE7;color:var(--ok)} .st.shut{background:#FDE2DE;color:var(--danger)}
+.bar{height:5px;background:#E9EFF4;border-radius:99px;margin:9px 0 7px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--teal);border-radius:99px;transition:width .4s}
+.cbox .num{font-size:12px;color:var(--muted)}
+.cbox .num b{color:var(--ink);font-family:var(--mono)}
+.cbox .acts{display:flex;gap:6px;margin-top:10px}
+
+/* 조 편집 */
+.team{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;background:#fff}
+.team.done{border-color:#A7D8B8;background:#F7FCF9}
+.thead{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:11px}
+.thead .tid{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.thead .tname{font-weight:700;font-size:14px}
+.thead .code{font-family:var(--mono);font-size:11px;background:#F1F5F9;padding:3px 8px;border-radius:6px;color:#475569}
+.thead .state{font-size:11px;font-family:var(--mono);padding:3px 8px;border-radius:999px;background:#F1F5F9;color:var(--muted)}
+.thead .state.done{background:#DCFCE7;color:var(--ok)}
+.thead .sp{flex:1}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.slot label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;margin-bottom:4px}
+.slot[data-p="male"] label{color:var(--male)} .slot[data-p="female"] label{color:var(--female)}
+.slot[data-p="rap"] label{color:var(--rap)} .slot[data-p="extra"] label{color:var(--muted)}
+.slot input{width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:13px;background:#fff}
+.slot input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:transparent}
+.slot .nm{font-size:11px;color:var(--muted);margin-top:3px;min-height:15px}
+.tfoot{display:flex;gap:8px;align-items:center;margin-top:11px;flex-wrap:wrap}
+.tfoot input.memo{flex:1;min-width:150px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12px}
+
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12px;background:#F1F5F9;border-radius:999px;padding:5px 10px;color:#475569}
+.pill b{font-family:var(--mono);font-weight:600;color:var(--ink);margin-right:4px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+td.mono{font-family:var(--mono)}
+.err{background:#FDF2F0;color:#8C2A1D;border:1px solid #F3CFC8;border-radius:9px;padding:11px 13px;font-size:13px;margin-top:12px}
+.err:empty{display:none}
+.note{border-left:3px solid var(--teal);background:#F0F9FA;padding:11px 13px;border-radius:0 8px 8px 0;font-size:13px;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);z-index:99;background:var(--ink);color:#fff;
+  padding:12px 18px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.hide{display:none !important}
+.foot{text-align:center;font-family:var(--mono);font-size:10px;color:#94A3B8;margin-top:28px;letter-spacing:.08em}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:600px){ .slots{grid-template-columns:repeat(2,1fr)} .title{font-size:24px} }
+</style>
+</head>
+<body>
+
+<header class="stage">
+  <div class="wrap">
+    <p class="eyebrow">교사용 관리 · 순천승평중학교 3학년 음악</p>
+    <h1 class="title">애상 조편성 <small>가창수행평가 관리 콘솔</small></h1>
+    <div class="who" id="who"></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 로그인 -->
+  <section id="s1" class="card">
+    <h2>교사 계정으로 로그인</h2>
+    <p class="sub">지정된 교사 계정만 접속할 수 있습니다.</p>
+    <div id="gbtn"></div>
+    <div id="pwbox" class="hide">
+      <label class="f" for="pw">교사용 비밀번호</label>
+      <input class="f" id="pw" type="password" placeholder="비밀번호" autocomplete="off">
+      <div class="row"><button class="btn block" id="doLogin">로그인</button></div>
+    </div>
+    <div class="err" id="e1"></div>
+  </section>
+
+  <!-- 콘솔 -->
+  <section id="s2" class="hide">
+
+    <div class="sect">반별 입력 통제</div>
+    <div class="card">
+      <p class="sub">각 반의 입력을 실시간으로 열고 닫습니다. 학생 화면은 6초마다 자동으로 반영됩니다.</p>
+      <div class="row" style="margin-top:0">
+        <button class="btn" id="openAll">전체 입력 허용</button>
+        <button class="btn warn" id="shutAll">전체 입력 금지</button>
+        <button class="btn ghost" id="reload">새로고침</button>
+      </div>
+      <div class="grid" id="dash" style="margin-top:14px"></div>
+    </div>
+
+    <div class="sect">학생 안내문</div>
+    <div class="card">
+      <p class="sub">학생 화면 상단에 표시됩니다.</p>
+      <input class="f" id="notice" maxlength="300" placeholder="예: 오늘 3교시까지 조 확정하세요.">
+      <div class="row"><button class="btn" id="saveNotice">안내문 저장</button></div>
+    </div>
+
+    <div class="sect">학생 명단 등록</div>
+    <div class="card">
+      <p class="sub">학번 4자리와 이름이 필요합니다. 성별(남/여)은 선택 사항이며 자동 배정에 사용됩니다. 학번이 같으면 덮어쓰지 않고 이름만 갱신합니다.</p>
+      <div class="row" style="margin-top:0">
+        <label class="btn ghost" for="csv" style="display:inline-flex;align-items:center">CSV 파일 선택</label>
+        <input type="file" id="csv" accept=".csv,.txt,.tsv" class="hide">
+        <span id="csvName" class="sub" style="margin:0;align-self:center"></span>
+      </div>
+      <label class="f" for="paste">또는 직접 붙여넣기</label>
+      <textarea class="f" id="paste" placeholder="3101 홍길동 남&#10;3102 김영희 여&#10;3103,이철수,남"></textarea>
+      <p class="hint">쉼표 · 탭 · 공백 어느 것으로 구분해도 됩니다. 머리글 행은 자동으로 건너뜁니다.</p>
+      <label class="f" for="mode">등록 방식</label>
+      <select class="f" id="mode">
+        <option value="merge">추가 · 갱신 (기존 명단 유지)</option>
+        <option value="replace">전체 교체 (기존 명단 모두 삭제)</option>
+      </select>
+      <div class="row">
+        <button class="btn" id="preview">미리 확인</button>
+        <button class="btn dark" id="upload" disabled>스프레드시트에 등록</button>
+      </div>
+      <div id="previewBox"></div>
+      <div class="err" id="e2"></div>
+    </div>
+
+    <div class="sect" id="detailSect">반별 조편성 관리</div>
+    <div class="card">
+      <div class="row" style="margin-top:0;align-items:center">
+        <select class="f" id="pickCls" style="max-width:180px"></select>
+        <button class="btn ghost sm" id="addTeam">빈 조 추가</button>
+        <button class="btn ghost sm" id="autoAssign">남은 학생 자동 배정</button>
+        <button class="btn ghost sm" id="exportCls">이 반 CSV</button>
+        <button class="btn ghost sm" id="exportAll">전체 CSV</button>
+        <button class="btn warn sm" id="resetCls">이 반 조편성 초기화</button>
+      </div>
+      <div class="err" id="e3"></div>
+      <div id="clsBody" style="margin-top:16px"></div>
+    </div>
+
+    <div class="sect">계정 연결 기록</div>
+    <div class="card">
+      <p class="sub">학번은 처음 로그인한 구글 계정에 고정됩니다. 학생이 계정을 잘못 연결했다면 초기화하세요.</p>
+      <div id="bindBody"></div>
+    </div>
+  </section>
+
+  <p class="foot" id="foot">SEUNGPYEONG MUSIC · TEACHER CONSOLE</p>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/*═══════════ 설정 ═══════════*/
+const GAS_URL   = '여기에_APPS_SCRIPT_웹앱_URL_붙여넣기';
+const CLIENT_ID = '여기에_클라이언트ID.apps.googleusercontent.com';
+const APP_VER   = 'v1.0.0';
+
+let credential=null, token=null, dash=null, cur=null, curCls='1', parsed=[], timer=null;
+
+const store=(()=>{try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return localStorage;}
+  catch(e){const m={};return{getItem:k=>m[k]??null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}};}})();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2600);}
+function showErr(id,m){$(id).textContent=m||'';}
+function busy(b,on,l){if(!b)return;if(on){b._t=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin"></span>'+(l||'처리 중');}else{b.disabled=false;if(b._t)b.innerHTML=b._t;}}
+
+async function api(action,payload){
+  const res=await fetch(GAS_URL,{method:'POST',redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(Object.assign({action},payload||{}))});
+  const d=await res.json();
+  if(!d.ok) throw new Error(d.error||'알 수 없는 오류가 발생했습니다.');
+  return d;
+}
+
+/*═══════════ 로그인 ═══════════*/
+window.onload=()=>{
+  const boot=()=>{ if(!window.google||!google.accounts) return setTimeout(boot,200);
+    google.accounts.id.initialize({client_id:CLIENT_ID,callback:onCred,hd:'ai.jne.kr'});
+    google.accounts.id.renderButton($('gbtn'),{theme:'filled_blue',size:'large',width:300,text:'signin_with',locale:'ko'});
+  }; boot();
+  const saved=store.getItem('aesang_tk');
+  if(saved){ token=saved; enter().catch(()=>{token=null;store.removeItem('aesang_tk');}); }
+};
+function onCred(r){ credential=r.credential; $('pwbox').classList.remove('hide'); $('pw').focus(); }
+$('pw').addEventListener('keydown',e=>{if(e.key==='Enter')$('doLogin').click();});
+
+$('doLogin').onclick=async()=>{
+  showErr('e1','');
+  const b=$('doLogin'); busy(b,true,'확인 중');
+  try{
+    const r=await api('teacherLogin',{credential,password:$('pw').value.trim()});
+    token=r.token; store.setItem('aesang_tk',token);
+    await enter(); toast('로그인되었습니다.');
+  }catch(err){ showErr('e1',err.message); }
+  finally{ busy(b,false); }
+};
+
+async function enter(){
+  await loadDash(true);
+  $('s1').classList.add('hide'); $('s2').classList.remove('hide');
+  $('pickCls').innerHTML=Array.from({length:9},(_,i)=>'<option value="'+(i+1)+'">3학년 '+(i+1)+'반</option>').join('');
+  $('pickCls').value=curCls;
+  await loadCls(curCls);
+  if(timer) clearInterval(timer);
+  timer=setInterval(()=>{ if(!document.hidden) loadDash(false).catch(()=>{}); },10000);
+}
+
+/*═══════════ 대시보드 ═══════════*/
+async function loadDash(first){
+  const r=await api('teacherState',{token});
+  dash=r;
+  if(first){
+    $('notice').value=r.notice||'';
+    $('foot').textContent='SEUNGPYEONG MUSIC · TEACHER CONSOLE · '+APP_VER+' / 백엔드 '+(r.version||'?');
+    $('who').innerHTML='<span class="chip">교사 계정 확인됨</span><span class="chip mono">'+esc(r.version||'')+
+      '</span><button class="linkout" id="logout">로그아웃</button>';
+    $('logout').onclick=()=>{store.removeItem('aesang_tk');if(timer)clearInterval(timer);
+      try{google.accounts.id.disableAutoSelect();}catch(e){} location.reload();};
+  }
+  $('dash').innerHTML=r.summary.map(c=>{
+    const pct=c.roster?Math.round(c.placed/c.roster*100):0;
+    return '<div class="cbox'+(c.cls===curCls?' sel':'')+'">'+
+      '<span class="st '+(c.open?'open':'shut')+'">'+(c.open?'입력 가능':'입력 금지')+'</span>'+
+      '<div class="cn">'+c.cls+'반</div>'+
+      '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+      '<div class="num">배정 <b>'+c.placed+'</b>/<b>'+c.roster+'</b> · 조 <b>'+c.teams+'</b> · 확정 <b>'+c.confirmed+'</b></div>'+
+      '<div class="acts">'+
+        '<button class="btn sm '+(c.open?'warn':'')+'" data-lock="'+c.cls+'" data-open="'+(c.open?0:1)+'">'+(c.open?'잠그기':'열기')+'</button>'+
+        '<button class="btn sm ghost" data-go="'+c.cls+'">관리</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+$('dash').addEventListener('click',async e=>{
+  const lock=e.target.closest('[data-lock]'), go=e.target.closest('[data-go]');
+  if(lock){ busy(lock,true,'');
+    try{ await api('setLock',{token,cls:lock.dataset.lock,open:lock.dataset.open==='1'}); await loadDash(false); }
+    catch(err){ toast(err.message); } finally{ busy(lock,false); }
+  }
+  if(go){ curCls=go.dataset.go; $('pickCls').value=curCls; await loadCls(curCls); await loadDash(false);
+    $('detailSect').scrollIntoView({behavior:'smooth',block:'start'}); }
+});
+
+$('openAll').onclick=async()=>{ await api('setLock',{token,cls:'all',open:true}); await loadDash(false); toast('전체 반 입력을 열었습니다.'); };
+$('shutAll').onclick=async()=>{ await api('setLock',{token,cls:'all',open:false}); await loadDash(false); toast('전체 반 입력을 잠갔습니다.'); };
+$('reload').onclick=async()=>{ await loadDash(false); await loadCls(curCls); toast('최신 상태로 새로 읽었습니다.'); };
+$('saveNotice').onclick=async()=>{ const b=$('saveNotice'); busy(b,true);
+  try{ await api('setNotice',{token,notice:$('notice').value}); toast('안내문을 저장했습니다.'); }
+  catch(err){ toast(err.message); } finally{ busy(b,false); } };
+
+/*═══════════ 명단 등록 ═══════════*/
+function splitCSVLine(line){
+  const out=[]; let cur='', q=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){ if(q&&line[i+1]==='"'){cur+='"';i++;} else q=!q; }
+    else if(ch===','&&!q){ out.push(cur); cur=''; }
+    else cur+=ch;
+  }
+  out.push(cur); return out;
+}
+function parseRoster(text){
+  const out=[];
+  text.split(/\r?\n/).forEach(raw=>{
+    const line=raw.replace(/^\uFEFF/,'').trim();
+    if(!line) return;
+    let parts = line.includes('\t') ? line.split('\t')
+              : line.includes(',')  ? splitCSVLine(line)
+              : line.split(/\s+/);
+    parts=parts.map(p=>String(p).replace(/^"|"$/g,'').trim()).filter(p=>p!=='');
+    const hi=parts.findIndex(p=>/^\d{4}$/.test(p));
+    if(hi<0) return;                              // 머리글 등은 자동 제외
+    const hakbeon=parts[hi];
+    const rest=parts.filter((_,i)=>i!==hi);
+    // 성별은 맨 끝 칸에 있을 때만 인정 — '여진구', '남상미' 같은 성씨 오인 방지
+    let gRaw='';
+    const last=rest[rest.length-1];
+    if(rest.length>=2 && /^(남|여|남자|여자|남학생|여학생|M|F)$/i.test(last)){ gRaw=last; rest.pop(); }
+    // 숫자가 섞이지 않고 글자가 2자 이상인 첫 칸을 이름으로 — '3학년 1반' 같은 여분 열 제외
+    let name=rest.find(p=>!/\d/.test(p) && (p.match(/[가-힣A-Za-z]/g)||[]).length>=2);
+    if(!name) name=rest.find(p=>/[가-힣A-Za-z]/.test(p));
+    if(!name) return;
+    out.push({hakbeon,name:name.replace(/\s+/g,''),gender:gRaw?(/^(남|남자|남학생|M)$/i.test(gRaw)?'남':'여'):''});
+  });
+  return out;
+}
+async function readFile(file){
+  const buf=await file.arrayBuffer();
+  try{ return new TextDecoder('utf-8',{fatal:true}).decode(buf); }
+  catch(e){ try{ return new TextDecoder('euc-kr').decode(buf); }
+            catch(e2){ return new TextDecoder('utf-8').decode(buf); } }
+}
+$('csv').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  $('csvName').textContent=f.name;
+  $('paste').value=await readFile(f);
+  $('preview').click();
+};
+$('preview').onclick=()=>{
+  showErr('e2','');
+  parsed=parseRoster($('paste').value);
+  if(!parsed.length){ $('previewBox').innerHTML=''; $('upload').disabled=true; return showErr('e2','읽어 들인 학생이 없습니다. 학번은 3101처럼 4자리여야 합니다.'); }
+  const dup={}, dups=[];
+  parsed.forEach(p=>{ if(dup[p.hakbeon]) dups.push(p.hakbeon); dup[p.hakbeon]=true; });
+  const byCls={};
+  parsed.forEach(p=>{ const c=p.hakbeon[1]; byCls[c]=(byCls[c]||0)+1; });
+  $('previewBox').innerHTML='<div class="note">총 <b>'+parsed.length+'명</b>을 읽었습니다. '+
+    Object.keys(byCls).sort().map(c=>c+'반 '+byCls[c]+'명').join(' · ')+
+    (dups.length?'<br><b style="color:var(--danger)">파일 안 중복 학번: '+[...new Set(dups)].join(', ')+'</b>':'')+
+    '</div><div class="pills" style="margin-top:10px">'+
+    parsed.slice(0,40).map(p=>'<span class="pill"><b>'+esc(p.hakbeon)+'</b>'+esc(p.name)+(p.gender?' · '+p.gender:'')+'</span>').join('')+
+    (parsed.length>40?'<span class="pill">외 '+(parsed.length-40)+'명</span>':'')+'</div>';
+  $('upload').disabled=false;
+};
+$('upload').onclick=async()=>{
+  const mode=$('mode').value;
+  if(mode==='replace' && !confirm('기존 명단을 모두 지우고 '+parsed.length+'명으로 교체합니다. 진행할까요?')) return;
+  const b=$('upload'); busy(b,true,'등록 중'); showErr('e2','');
+  try{
+    const r=await api('uploadRoster',{token,rows:parsed,mode});
+    $('previewBox').innerHTML='<div class="note">등록 완료 — 추가 <b>'+r.added+'명</b> · 이름 갱신 <b>'+r.updated+
+      '명</b> · 변경 없음 <b>'+r.skipped+'명</b>'+
+      (r.errors && r.errors.length?'<br><b style="color:var(--danger)">건너뜀 '+r.errors.length+'건</b><br><span style="font-size:12px">'+
+        r.errors.slice(0,10).map(esc).join('<br>')+'</span>':'')+'</div>';
+    $('upload').disabled=true;
+    await loadDash(false); await loadCls(curCls);
+    toast('명단을 등록했습니다.');
+  }catch(err){ showErr('e2',err.message); }
+  finally{ busy(b,false); }
+};
+
+/*═══════════ 반별 관리 ═══════════*/
+$('pickCls').onchange=async e=>{ curCls=e.target.value; await loadCls(curCls); await loadDash(false); };
+
+async function loadCls(cls){
+  const r=await api('teacherClass',{token,cls});
+  cur=r;
+  const nmap={}; r.roster.forEach(s=>nmap[s.hakbeon]=s.name);
+
+  const dl='<datalist id="rl">'+r.roster.map(s=>'<option value="'+esc(s.hakbeon)+'">'+esc(s.name)+'</option>').join('')+'</datalist>';
+
+  const teamsHtml=r.teams.length ? r.teams.map(t=>{
+    const slot=(p,label)=>{
+      const m=t[p];
+      return '<div class="slot" data-p="'+p+'"><label>'+label+'</label>'+
+        '<input list="rl" value="'+esc(m?m.hakbeon:'')+'" data-slot="'+p+'" data-team="'+esc(t.teamId)+'" maxlength="4" placeholder="학번">'+
+        '<div class="nm">'+esc(m?m.name:'')+'</div></div>';
+    };
+    return '<div class="team'+(t.status==='확정'?' done':'')+'" data-team="'+esc(t.teamId)+'">'+
+      '<div class="thead"><span class="tid">'+esc(t.teamId)+'</span>'+
+        '<span class="tname">'+esc(t.teamName||'(이름 없음)')+'</span>'+
+        '<span class="code">'+esc(t.code)+'</span>'+
+        '<span class="state'+(t.status==='확정'?' done':'')+'">'+esc(t.status)+'</span><span class="sp"></span>'+
+        '<button class="btn sm ghost" data-act="toggle" data-team="'+esc(t.teamId)+'">'+(t.status==='확정'?'확정 해제':'확정 처리')+'</button>'+
+        '<button class="btn sm warn" data-act="del" data-team="'+esc(t.teamId)+'">삭제</button>'+
+      '</div>'+
+      '<div class="slots">'+slot('male','MALE 남성파트')+slot('female','FEMALE 여성파트')+slot('rap','RAP 랩파트')+slot('extra','EXTRA 추가원')+'</div>'+
+      '<div class="tfoot">'+
+        '<input class="memo" data-memo="'+esc(t.teamId)+'" value="'+esc(t.memo||'')+'" placeholder="메모 (평가 참고)">'+
+        '<button class="btn sm" data-act="save" data-team="'+esc(t.teamId)+'">저장</button>'+
+      '</div></div>';
+  }).join('') : '<p class="sub">아직 만들어진 조가 없습니다.</p>';
+
+  $('clsBody').innerHTML = dl +
+    '<div class="row" style="margin:0 0 12px"><span class="pill">명단 <b>'+r.roster.length+'명</b></span>'+
+      '<span class="pill">조 <b>'+r.teams.length+'개</b></span>'+
+      '<span class="pill">미배정 <b>'+r.unassigned.length+'명</b></span>'+
+      '<span class="pill">'+(r.open?'입력 가능':'입력 금지')+'</span></div>' +
+    teamsHtml +
+    '<div class="sect" style="margin-top:20px">미배정 학생</div>'+
+    '<div class="pills" style="margin-top:12px">'+
+      (r.unassigned.length?r.unassigned.map(u=>'<span class="pill"><b>'+esc(u.hakbeon)+'</b>'+esc(u.name)+'</span>').join('')
+       :'<span class="pill">모든 학생이 배정되었습니다</span>')+'</div>';
+
+  $('bindBody').innerHTML = r.bindings.length
+    ? '<table><thead><tr><th>학번</th><th>이름</th><th>연결된 구글 계정</th><th>최근 로그인</th><th></th></tr></thead><tbody>'+
+      r.bindings.map(b=>'<tr><td class="mono">'+esc(b.hakbeon)+'</td><td>'+esc(nmap[b.hakbeon]||'')+'</td>'+
+        '<td class="mono">'+esc(b.email)+'</td><td class="mono">'+esc(String(b.lastLogin).replace('T',' '))+'</td>'+
+        '<td><button class="btn sm warn" data-unbind="'+esc(b.hakbeon)+'">초기화</button></td></tr>').join('')+
+      '</tbody></table>'
+    : '<p class="sub" style="margin:0">'+cls+'반은 아직 로그인 기록이 없습니다.</p>';
+}
+
+$('clsBody').addEventListener('input',e=>{
+  const inp=e.target.closest('input[data-slot]'); if(!inp) return;
+  const v=inp.value.trim();
+  const hit=cur.roster.find(s=>s.hakbeon===v);
+  inp.parentElement.querySelector('.nm').textContent = v ? (hit?hit.name:'명단에 없음') : '';
+  inp.parentElement.querySelector('.nm').style.color = v && !hit ? 'var(--danger)' : 'var(--muted)';
+});
+
+$('clsBody').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  const id=b.dataset.team, act=b.dataset.act;
+  showErr('e3','');
+  try{
+    if(act==='del'){
+      if(!confirm(id+' 조를 삭제할까요?')) return;
+      busy(b,true,''); await api('teacherDeleteTeam',{token,teamId:id}); toast('조를 삭제했습니다.');
+    }else{
+      const box=$('clsBody').querySelector('.team[data-team="'+CSS.escape(id)+'"]');
+      const slots={};
+      box.querySelectorAll('input[data-slot]').forEach(i=>slots[i.dataset.slot]=i.value.trim());
+      const memo=box.querySelector('input[data-memo]').value;
+      const t=cur.teams.find(x=>x.teamId===id);
+      const payload={token,teamId:id,slots,memo};
+      if(act==='toggle') payload.status = t.status==='확정' ? '작성중' : '확정';
+      busy(b,true,''); await api('teacherSaveTeam',payload);
+      toast(act==='toggle' ? '상태를 바꿨습니다.' : '저장했습니다.');
+    }
+    await loadCls(curCls); await loadDash(false);
+  }catch(err){ showErr('e3',err.message); busy(b,false); }
+});
+
+$('bindBody').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-unbind]'); if(!b) return;
+  if(!confirm(b.dataset.unbind+'번의 구글 계정 연결을 초기화할까요? 학생이 다시 로그인하면 새 계정으로 연결됩니다.')) return;
+  busy(b,true,'');
+  try{ await api('teacherResetBinding',{token,hakbeon:b.dataset.unbind}); await loadCls(curCls); toast('연결을 초기화했습니다.'); }
+  catch(err){ toast(err.message); busy(b,false); }
+});
+
+$('addTeam').onclick=async()=>{ const b=$('addTeam'); busy(b,true,'');
+  try{ await api('teacherCreateTeam',{token,cls:curCls}); await loadCls(curCls); await loadDash(false); toast('빈 조를 추가했습니다.'); }
+  catch(err){ showErr('e3',err.message); } finally{ busy(b,false); } };
+
+$('autoAssign').onclick=async()=>{
+  if(!confirm(curCls+'반의 미배정 학생을 자동으로 배정합니다. 기존 조의 빈 파트부터 채웁니다. 진행할까요?')) return;
+  const b=$('autoAssign'); busy(b,true,'배정 중');
+  try{ const r=await api('teacherAutoAssign',{token,cls:curCls}); await loadCls(curCls); await loadDash(false);
+    toast('새 조 '+r.created+'개 · 빈자리 '+r.filled+'명을 채웠습니다.'); }
+  catch(err){ showErr('e3',err.message); } finally{ busy(b,false); } };
+
+$('resetCls').onclick=async()=>{
+  if(!confirm(curCls+'반의 조편성을 모두 지웁니다. 명단은 남습니다. 진행할까요?')) return;
+  if(!confirm('되돌릴 수 없습니다. 정말 초기화할까요?')) return;
+  const b=$('resetCls'); busy(b,true,'');
+  try{ const r=await api('teacherResetClass',{token,cls:curCls}); await loadCls(curCls); await loadDash(false);
+    toast(r.deleted+'개 조를 지웠습니다.'); }
+  catch(err){ showErr('e3',err.message); } finally{ busy(b,false); } };
+
+async function doExport(cls){
+  const r=await api('teacherExport',{token,cls});
+  const csv=r.rows.map(row=>row.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='애상_조편성_'+(cls==='all'?'전체':cls+'반')+'.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('CSV를 내려받았습니다.');
+}
+$('exportCls').onclick=()=>doExport(curCls).catch(e=>showErr('e3',e.message));
+$('exportAll').onclick=()=>doExport('all').catch(e=>showErr('e3',e.message));
+</script>
+</body>
+</html>
